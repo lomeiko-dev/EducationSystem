@@ -10,6 +10,7 @@ namespace EducationSystem.BussinesLogic.Repository
     {
         private readonly ApplicationContext applicationContext;
 
+
         public UserRepository(ApplicationContext applicationContext)
         {
             this.applicationContext = applicationContext;
