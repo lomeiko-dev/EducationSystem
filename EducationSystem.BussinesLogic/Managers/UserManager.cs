@@ -68,11 +68,6 @@ namespace EducationSystem.BussinesLogic.Managers
             if (user == null)
                 return null;
 
-            // find user by id
-            var resultFindUser = await userRepository.GetAsync(user.Id.ToString());
-            if (resultFindUser == null)
-                return null;
-
             // search confirm token by user id
             var resultFindConfirmToken = await confirmToken.GetAsync(user.Id.ToString());
             if (resultFindConfirmToken != null)
@@ -104,12 +99,7 @@ namespace EducationSystem.BussinesLogic.Managers
         public async Task<BaseResponse> ConfirmEmailByTokenAsync(User user, string token)
         {
             if (user == null)
-                return new BaseResponse(optionsAnswer.BadRequest, 400, false);
-
-            // find user
-            var resultFindUser = await userRepository.GetAsync(user.Id.ToString());
-            if (resultFindUser == null)
-                return new BaseResponse(optionsAnswer.NotFound.Replace("{object}", "user"), 404, false);
+                return new BaseResponse(optionsAnswer.BadRequest.Replace("{object}", "user"), 400, false);
 
             // find token by user id
             var emailToken = await confirmToken.GetAsync(user.Id.ToString());

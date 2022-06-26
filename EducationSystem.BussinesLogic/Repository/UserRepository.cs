@@ -50,16 +50,15 @@ namespace EducationSystem.BussinesLogic.Repository
                 return false;
 
             var user = await applicationContext.Users.FirstOrDefaultAsync(x => x.Id.ToString() == id);
-
             if (user == null)
                 return false;
                
-
             user.FullName = entity.FullName;
             user.Phone_Number = entity.Phone_Number;
             user.Password_Hash = entity.Password_Hash;
             user.IsEmailConfirm = entity.IsEmailConfirm;
             user.Age = entity.Age;
+            user.DateUpdate = DateTime.Now;
 
             await applicationContext.SaveChangesAsync();
 
