@@ -10,8 +10,11 @@ namespace EducationSystem.Helper.Request
 
         [DataType(DataType.PhoneNumber)]
         public string NumberPhone { get; set; }
-
         public int Age { get; set; }
+        public string DateDayBirth { get; set; }
+        public string DateMonthBirth { get; set; }
+        public string DateYearBirth { get; set; }
+        public string HomeAddress { get; set; }
 
         [Required(ErrorMessage = "Укажите почту")]
         [EmailAddress]

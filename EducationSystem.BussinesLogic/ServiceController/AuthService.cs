@@ -1,12 +1,12 @@
 ﻿using EducationSystem.Application.Repository.User;
 using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
-using EducationSystem.BussinesLogic.Managers;
 using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.Generators;
 using EducationSystem.Helper.Options;
 using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -24,14 +24,14 @@ namespace EducationSystem.BussinesLogic.ServiceController
         private readonly GenerateJwtToken generateJwtToken;
 
         private readonly IRefreshRepository<bool, RefreshToken, string> refreshRepository;
-        private readonly UserManager userManager;
+        private readonly UserManager<User> userManager;
 
         private readonly IUrlHelper urlHelper;
 
         public AuthService(
                            EmailService emailService,
                            IOptions<OptionsAnswer> optionsAnswer,
-                           UserManager userManager,
+                           UserManager<User> userManager,
                            GenerateJwtToken generateJwtToken,
                            IRefreshRepository<bool, RefreshToken, string> refreshRepository,
                            IUrlHelperFactory urlHelperFactory,
@@ -52,15 +52,20 @@ namespace EducationSystem.BussinesLogic.ServiceController
             var user = new User
             {
                 FullName = request.FullName,
+                UserName = request.Email,
                 Email = request.Email,
-                Phone_Number = request.NumberPhone,
-                Age = request.Age
+                PhoneNumber = request.NumberPhone,
+                Age = request.Age,
+                DateBirthday = new DateTime(int.Parse(request.DateYearBirth), 
+                                            int.Parse(request.DateMonthBirth), 
+                                            int.Parse(request.DateDayBirth)),
+                HomeAddress = request.HomeAddress
             };
 
             // registration
             var result = await userManager.CreateAsync(user, request.Password);
-            if (!result.Succeded)
-                return result;
+            if (!result.Succeeded)
+                return new BaseResponse(result.Errors.Select(x => x.Description), 400);
 
             return new BaseResponse(optionsAnswer.RegistrationSuccessfullyMessage, 200);
         }
@@ -68,17 +73,18 @@ namespace EducationSystem.BussinesLogic.ServiceController
         public async Task<BaseResponse> LoginUserAsync(RequestLogin request)
         {
             // find user by email address
-            var user = await userManager.GetUserByEmailAsync(request.Login);
+            var user = await userManager.FindByEmailAsync(request.Login);
                 if (user == null)
                     return new BaseResponse(optionsAnswer.UserNotFound, 404);
 
             // check password
-            var resultChekPassword = await userManager.IsValidPasswordAsync(user, request.Password);
+            var resultChekPassword = await userManager.CheckPasswordAsync(user, request.Password);
             if (!resultChekPassword)
                 return new BaseResponse(optionsAnswer.InvalidPassword, 400);
 
             // check confirm email
-            if(!user.IsEmailConfirm)
+            var resultCheckEmailConfirm = await userManager.IsEmailConfirmedAsync(user);
+            if (!resultCheckEmailConfirm)
                 return new BaseResponse(optionsAnswer.EmailNotConfirm, 400);
                
             // return jwt tokens
@@ -88,11 +94,11 @@ namespace EducationSystem.BussinesLogic.ServiceController
         public async Task<BaseResponse> SendNewConfirmMessageEmailAsync(string id_user, string actionEmailConfirm, string controller)
         {
             // find user by id
-            var user = await userManager.GetUserByIdAsync(id_user);
+            var user = await userManager.FindByIdAsync(id_user);
             if (user == null)
                 return new BaseResponse(optionsAnswer.NotFound.Replace("{object}", "user"), 404);
 
-            var token = await userManager.GenerateConfirmationEmailTokenAsync(user);
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             // generate url
             string url = urlHelper.Action(actionEmailConfirm, controller,
                                           new { id_user = user.Id.ToString(), token = token },
@@ -108,14 +114,14 @@ namespace EducationSystem.BussinesLogic.ServiceController
         public async Task<BaseResponse> EmailConfirmAsync(RequestEmailConfirm request)
         {
             // find user by id from request
-            var user = await userManager.GetUserByIdAsync(request.Id_user);
+            var user = await userManager.FindByIdAsync(request.Id_user);
             if (user == null)
                 return new BaseResponse(optionsAnswer.NotFound, 404);
 
             // check tokens
-            var result = await userManager.ConfirmEmailByTokenAsync(user, request.Token);
-            if (!result.Succeded)
-                return result;
+            var result = await userManager.ConfirmEmailAsync(user, request.Token);
+            if (!result.Succeeded)
+                return new BaseResponse(result.Errors.Select(x => x.Description), 400);
 
             return new BaseResponse(optionsAnswer.Emailconfirmed, 200);
         }
@@ -148,7 +154,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
             await refreshRepository.DeleteTokenAsync(token);
 
             // find user by id from token
-            var user = await userManager.GetUserByIdAsync(token.id_user);
+            var user = await userManager.FindByIdAsync(token.id_user);
             if (user == null)
                 return new BaseResponse(optionsAnswer.NotFound.Replace("{object}", "user"), 404);
 

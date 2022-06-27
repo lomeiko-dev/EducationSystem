@@ -1,10 +1,10 @@
 ﻿using EducationSystem.Application.Repository.User;
 using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
-using EducationSystem.BussinesLogic.Managers;
 using EducationSystem.BussinesLogic.Repository;
 using EducationSystem.BussinesLogic.ServiceController;
 using EducationSystem.Core.Entity.User;
+using EducationSystem.Helper.Custom;
 using EducationSystem.Helper.Generators;
 using EducationSystem.Helper.Hash;
 using EducationSystem.Helper.Options;
@@ -12,6 +12,7 @@ using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
 using EducationSystem.Helper.Validators;
 using EducationSystem.Infrastructure.Context;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace EducationSystem.Web.Api.Buid
@@ -58,15 +59,12 @@ namespace EducationSystem.Web.Api.Buid
 
         public void AddServicesCrud()
         {
-            Builder.Services.AddTransient<IUserRepository<bool, User, string>, UserRepository>()
-                            .AddTransient<IConfirmTokenRepository<bool, ConfirmToken, string>, ConfirmEmailTokenRepository>()
-                            .AddTransient<IRefreshRepository<bool, RefreshToken, string>, RefreshRepository>();
+            Builder.Services.AddTransient<IRefreshRepository<bool, RefreshToken, string>, RefreshRepository>();
         }
 
         public void AddModelOptions()
         {
-            Builder.Services.Configure<OptionsValidatePassword>(Builder.Configuration.GetSection("ValidatePassword"))
-                            .Configure<OptionsEmailApp>(Builder.Configuration.GetSection("EmailApp"))
+            Builder.Services.Configure<OptionsEmailApp>(Builder.Configuration.GetSection("EmailApp"))
                             .Configure<OptionsAnswer>(Builder.Configuration.GetSection("Answer"))
                             .Configure<OptionsJwtValidate>(Builder.Configuration.GetSection("JWTTokenValidate"));
         }
@@ -78,7 +76,11 @@ namespace EducationSystem.Web.Api.Buid
                             .AddTransient<GenerateJwtToken>()
                             .AddTransient<GenerateToken>()
                             .AddTransient<HashService>()
-                            .AddTransient<UserManager>();
+
+                            .AddIdentity<User, IdentityRole>(optionsManager.IdentityUserOption)
+                            .AddErrorDescriber<CustomIdentityErrorDescription>()
+                            .AddEntityFrameworkStores<ApplicationContext>()
+                            .AddDefaultTokenProviders();
         }
 
         public void AddServiceHttpContextAccessor()
