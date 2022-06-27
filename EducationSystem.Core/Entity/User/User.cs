@@ -6,7 +6,7 @@ namespace EducationSystem.Core.Entity.User
     public class User : IdentityUser
     {
         public string FullName { get; set; }
-        public string HomeAddress { get; set; }
+        public string? HomeAddress { get; set; }
         public int Age { get; set; }
         public DateTime DateBirthday { get; set; }
         public string? Id_school { get; set; }

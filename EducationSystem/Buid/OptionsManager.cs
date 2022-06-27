@@ -59,15 +59,12 @@ namespace EducationSystem.Web.Api
         public void IdentityUserOption(IdentityOptions configure)
         {
             var sectionValidatePassword = builder.Configuration.GetSection("ValidatePassword");
-            var sectionValidateUser = builder.Configuration.GetSection("ValidateUser");
 
             configure.Password.RequiredLength = int.Parse(sectionValidatePassword.GetSection("RequiredLength").Value);
             configure.Password.RequireNonAlphanumeric = bool.Parse(sectionValidatePassword.GetSection("isRequireNonAlphanumeric").Value);
             configure.Password.RequireLowercase = bool.Parse(sectionValidatePassword.GetSection("RequireLowercase").Value);
             configure.Password.RequireUppercase = bool.Parse(sectionValidatePassword.GetSection("RequireUppercase").Value);
             configure.Password.RequireDigit = bool.Parse(sectionValidatePassword.GetSection("isRequireDigit").Value);
-
-            configure.User.RequireUniqueEmail = bool.Parse(sectionValidateUser.GetSection("isRequireUniqueEmail").Value);
         }
     }
 }

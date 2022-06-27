@@ -12,7 +12,7 @@ namespace EducationSystem.Helper.Extensions
                 var result = await func.Invoke(item);
                 return controller.StatusCode(result.StatusCode, result.Value);
             }
-            return controller.StatusCode(400, "Данные не валидны");
+            return controller.StatusCode(400, controller.ModelState.Select(item => item.Value.Errors.Select(error => error.ErrorMessage)));
         }
 
         public static async Task<IActionResult> Take<TItem, TItem2>(this ControllerBase controller, TItem item, TItem2 item2, Func<TItem, TItem2, Task<BaseResponse>> func)
@@ -22,7 +22,7 @@ namespace EducationSystem.Helper.Extensions
                 var result = await func.Invoke(item, item2);
                 return controller.StatusCode(result.StatusCode, result.Value);
             }
-            return controller.StatusCode(400, "Данные не валидны");
+            return controller.StatusCode(400, controller.ModelState.Select(item => item.Value.Errors.Select(error => error.ErrorMessage)));
         }
 
         public static async Task<IActionResult> Take<TItem, TItem2, TItem3>(this ControllerBase controller, TItem item, TItem2 item2, TItem3 item3, Func<TItem, TItem2, TItem3, Task<BaseResponse>> func)
@@ -32,7 +32,7 @@ namespace EducationSystem.Helper.Extensions
                 var result = await func.Invoke(item, item2, item3);
                 return controller.StatusCode(result.StatusCode, result.Value);
             }
-            return controller.StatusCode(400, "Данные не валидны");
+            return controller.StatusCode(400, controller.ModelState.Select(item => item.Value.Errors.Select(error => error.ErrorMessage)));
         }
     }
 }

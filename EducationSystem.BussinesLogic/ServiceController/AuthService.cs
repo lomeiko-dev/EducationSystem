@@ -2,7 +2,7 @@
 using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
 using EducationSystem.Core.Entity.User;
-using EducationSystem.Helper.Generators;
+using EducationSystem.Helper.JWT;
 using EducationSystem.Helper.Options;
 using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
@@ -21,7 +21,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
         private readonly EmailService emailService;
 
         private readonly OptionsAnswer optionsAnswer;
-        private readonly GenerateJwtToken generateJwtToken;
+        private readonly JwtManager generateJwtToken;
 
         private readonly IRefreshRepository<bool, RefreshToken, string> refreshRepository;
         private readonly UserManager<User> userManager;
@@ -32,7 +32,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
                            EmailService emailService,
                            IOptions<OptionsAnswer> optionsAnswer,
                            UserManager<User> userManager,
-                           GenerateJwtToken generateJwtToken,
+                           JwtManager generateJwtToken,
                            IRefreshRepository<bool, RefreshToken, string> refreshRepository,
                            IUrlHelperFactory urlHelperFactory,
                            IActionContextAccessor actionContextAccessor)

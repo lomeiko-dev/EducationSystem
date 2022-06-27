@@ -5,12 +5,10 @@ using EducationSystem.BussinesLogic.Repository;
 using EducationSystem.BussinesLogic.ServiceController;
 using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.Custom;
-using EducationSystem.Helper.Generators;
-using EducationSystem.Helper.Hash;
+using EducationSystem.Helper.JWT; 
 using EducationSystem.Helper.Options;
 using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
-using EducationSystem.Helper.Validators;
 using EducationSystem.Infrastructure.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -66,16 +64,15 @@ namespace EducationSystem.Web.Api.Buid
         {
             Builder.Services.Configure<OptionsEmailApp>(Builder.Configuration.GetSection("EmailApp"))
                             .Configure<OptionsAnswer>(Builder.Configuration.GetSection("Answer"))
+                            .Configure<OptionsCustomValidateUser>(Builder.Configuration.GetSection("CustomValidateUser"))
                             .Configure<OptionsJwtValidate>(Builder.Configuration.GetSection("JWTTokenValidate"));
         }
 
         public void AddServiceHelp()
         {
-            Builder.Services.AddTransient<ValidatePassword>()
-                            .AddTransient<EmailService>()
-                            .AddTransient<GenerateJwtToken>()
-                            .AddTransient<GenerateToken>()
-                            .AddTransient<HashService>()
+            Builder.Services.AddTransient<EmailService>()
+                            .AddTransient<JwtManager>()
+                            .AddTransient<JwtManager>()
 
                             .AddIdentity<User, IdentityRole>(optionsManager.IdentityUserOption)
                             .AddErrorDescriber<CustomIdentityErrorDescription>()

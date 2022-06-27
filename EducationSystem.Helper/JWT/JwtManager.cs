@@ -5,13 +5,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace EducationSystem.Helper.Generators
+namespace EducationSystem.Helper.JWT
 {
-    public class GenerateJwtToken
+    public class JwtManager
     {
         private readonly OptionsJwtValidate optionsJwtValidate;
 
-        public GenerateJwtToken(IOptions<OptionsJwtValidate> optionsJwtValidate)
+        public JwtManager(IOptions<OptionsJwtValidate> optionsJwtValidate)
         {
             this.optionsJwtValidate = optionsJwtValidate.Value;
         }
