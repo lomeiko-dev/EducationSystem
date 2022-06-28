@@ -1,4 +1,6 @@
-﻿namespace EducationSystem.Core.Entity.User
+﻿using EducationSystem.Core.Entity;
+
+namespace EducationSystem.Core.Entity.Refresh
 {
     public class RefreshToken : BaseEntity
     {

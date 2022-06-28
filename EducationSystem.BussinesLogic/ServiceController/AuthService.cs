@@ -1,6 +1,7 @@
-﻿using EducationSystem.Application.Repository.User;
+﻿using EducationSystem.Application.Repository;
 using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
+using EducationSystem.Core.Entity.Refresh;
 using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.JWT;
 using EducationSystem.Helper.Options;
@@ -55,7 +56,6 @@ namespace EducationSystem.BussinesLogic.ServiceController
                 UserName = request.Email,
                 Email = request.Email,
                 PhoneNumber = request.NumberPhone,
-                Age = request.Age,
                 DateBirthday = new DateTime(int.Parse(request.DateYearBirth), 
                                             int.Parse(request.DateMonthBirth), 
                                             int.Parse(request.DateDayBirth)),

@@ -4,7 +4,6 @@ namespace EducationSystem.Helper.Options
     public class OptionsAnswer
     {
         public string ConfirmEmailMassage { get; set; }
-        public string EmailExistsMessage { get; set; }
         public string RegistrationSuccessfullyMessage { get; set; }
         public string UserNotFound { get; set; }
         public string InvalidPassword { get; set; }

@@ -65,6 +65,8 @@ namespace EducationSystem.Web.Api
             configure.Password.RequireLowercase = bool.Parse(sectionValidatePassword.GetSection("RequireLowercase").Value);
             configure.Password.RequireUppercase = bool.Parse(sectionValidatePassword.GetSection("RequireUppercase").Value);
             configure.Password.RequireDigit = bool.Parse(sectionValidatePassword.GetSection("isRequireDigit").Value);
+
+            configure.User.RequireUniqueEmail = true; // defaults
         }
     }
 }

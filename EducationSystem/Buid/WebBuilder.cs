@@ -1,11 +1,12 @@
-﻿using EducationSystem.Application.Repository.User;
+﻿using EducationSystem.Application.Repository;
 using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
 using EducationSystem.BussinesLogic.Repository;
 using EducationSystem.BussinesLogic.ServiceController;
+using EducationSystem.Core.Entity.Refresh;
 using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.Custom;
-using EducationSystem.Helper.JWT; 
+using EducationSystem.Helper.JWT;
 using EducationSystem.Helper.Options;
 using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
@@ -71,13 +72,14 @@ namespace EducationSystem.Web.Api.Buid
         public void AddServiceHelp()
         {
             Builder.Services.AddTransient<EmailService>()
-                            .AddTransient<JwtManager>()
-                            .AddTransient<JwtManager>()
+                            .AddTransient<JwtManager>();
 
-                            .AddIdentity<User, IdentityRole>(optionsManager.IdentityUserOption)
+            Builder.Services.AddIdentity<User, IdentityRole>(optionsManager.IdentityUserOption)
                             .AddErrorDescriber<CustomIdentityErrorDescription>()
+                            .AddUserValidator<CustomUserValidator>()
                             .AddEntityFrameworkStores<ApplicationContext>()
                             .AddDefaultTokenProviders();
+
         }
 
         public void AddServiceHttpContextAccessor()

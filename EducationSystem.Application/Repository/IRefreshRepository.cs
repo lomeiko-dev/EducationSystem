@@ -1,5 +1,4 @@
-﻿
-namespace EducationSystem.Application.Repository.User
+﻿namespace EducationSystem.Application.Repository
 {
     public interface IRefreshRepository<TResponse, TEntity, TId>
     {

@@ -10,7 +10,6 @@ namespace EducationSystem.Helper.Request
 
         [DataType(DataType.PhoneNumber)]
         public string NumberPhone { get; set; }
-        public int Age { get; set; }
 
         [Required(ErrorMessage = "DateDayBirth is null")]
         public string DateDayBirth { get; set; }
@@ -20,9 +19,11 @@ namespace EducationSystem.Helper.Request
 
         [Required(ErrorMessage = "DateYearBirth is null")]
         public string DateYearBirth { get; set; }
+
+        [Required(ErrorMessage = "Адрес проживания не указан")]
         public string HomeAddress { get; set; }
 
-        [Required(ErrorMessage = "Укажите почту")]
+        [Required(ErrorMessage = "почта не указана")]
         [EmailAddress(ErrorMessage = "Поле электронной почты не является действительным адресом электронной почты.")]
         public string Email { get; set; }
 

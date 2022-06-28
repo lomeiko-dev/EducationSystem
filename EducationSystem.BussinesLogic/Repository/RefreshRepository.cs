@@ -1,6 +1,5 @@
-﻿
-using EducationSystem.Application.Repository.User;
-using EducationSystem.Core.Entity.User;
+﻿using EducationSystem.Application.Repository;
+using EducationSystem.Core.Entity.Refresh;
 using EducationSystem.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 

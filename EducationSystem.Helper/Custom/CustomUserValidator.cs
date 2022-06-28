@@ -20,21 +20,14 @@ namespace EducationSystem.Helper.Custom
             {
                 var errors = new List<IdentityError>();
 
-                if (optionsValidateUser.isRequireUniqueEmail)
-                {
-                    var email = await manager.FindByEmailAsync(user.Email);
-                    if (email != null)
-                        errors.Add(manager.ErrorDescriber.DuplicateEmail(user.Email));
-                }
-
                 if (optionsValidateUser.NickNameUseFormat)
                 {
-                    var fullname = string.Join(" ", user.FullName);
-                    if (fullname.Length != 2)
+                    var fullname = user.FullName.Split(" ");
+                    if (fullname.Length != 3)
                         errors.Add(new IdentityError { Description = "ФИО составлено не верно. Верный формат - [Фамилия Имя Отчество]." });
                 }
 
-                if (optionsValidateUser.NickNameUseSymbol)
+                if (optionsValidateUser.NickNameDontUseSymbol)
                 {
                     var resultCheckSymbol = user.FullName.ToList().Where(x => char.IsNumber(x) == true || char.IsSymbol(x) == true).ToList();
                     if (resultCheckSymbol.Count > 0)

@@ -1,5 +1,4 @@
-﻿
-using EducationSystem.Helper.Options;
+﻿using EducationSystem.Helper.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;

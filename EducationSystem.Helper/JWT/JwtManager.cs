@@ -39,7 +39,7 @@ namespace EducationSystem.Helper.JWT
             { return false; }
         }
 
-        public string CreateToken(int minute, List<Claim> claims = null)
+        public string CreateToken(int minute, List<Claim> claims)
         {
             var jwt = new JwtSecurityToken(
             issuer: optionsJwtValidate.Issuer,
