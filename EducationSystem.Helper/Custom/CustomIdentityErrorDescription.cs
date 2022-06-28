@@ -6,8 +6,6 @@ namespace EducationSystem.Helper.Custom
     {
         public override IdentityError DefaultError() { return new IdentityError { Code = nameof(DefaultError), Description = $"Произошел низвестный сбой" }; }
         public override IdentityError ConcurrencyFailure() { return new IdentityError { Code = nameof(ConcurrencyFailure), Description = "Оптимистичный сбой параллелизма, объект был изменен." }; }
-        public override IdentityError PasswordMismatch() { return new IdentityError { Code = nameof(PasswordMismatch), Description = "Неверный пароль" }; }
-        public override IdentityError InvalidToken() { return new IdentityError { Code = nameof(InvalidToken), Description = "Token invalid" }; }
         public override IdentityError LoginAlreadyAssociated() { return new IdentityError { Code = nameof(LoginAlreadyAssociated), Description = "Логин уже связан" }; }
         public override IdentityError InvalidEmail(string email) { return new IdentityError { Code = nameof(InvalidEmail), Description = $"Адрес '{email}' - неверный" }; }
         public override IdentityError DuplicateUserName(string userName) { return new IdentityError { Code = nameof(DuplicateUserName), Description = $"Имя пользователя '{userName}' уже существует" }; }

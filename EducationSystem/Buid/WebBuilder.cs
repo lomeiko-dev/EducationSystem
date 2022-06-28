@@ -1,9 +1,6 @@
-﻿using EducationSystem.Application.Repository;
-using EducationSystem.Application.ServiceControllers;
+﻿using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
-using EducationSystem.BussinesLogic.Repository;
 using EducationSystem.BussinesLogic.ServiceController;
-using EducationSystem.Core.Entity.Refresh;
 using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.Custom;
 using EducationSystem.Helper.JWT;
@@ -58,7 +55,6 @@ namespace EducationSystem.Web.Api.Buid
 
         public void AddServicesCrud()
         {
-            Builder.Services.AddTransient<IRefreshRepository<bool, RefreshToken, string>, RefreshRepository>();
         }
 
         public void AddModelOptions()
@@ -66,7 +62,8 @@ namespace EducationSystem.Web.Api.Buid
             Builder.Services.Configure<OptionsEmailApp>(Builder.Configuration.GetSection("EmailApp"))
                             .Configure<OptionsAnswer>(Builder.Configuration.GetSection("Answer"))
                             .Configure<OptionsCustomValidateUser>(Builder.Configuration.GetSection("CustomValidateUser"))
-                            .Configure<OptionsJwtValidate>(Builder.Configuration.GetSection("JWTTokenValidate"));
+                            .Configure<OptionsJwtValidate>(Builder.Configuration.GetSection("JWTTokenValidate"))
+                            .Configure<OptionsBaseAnswer>(Builder.Configuration.GetSection("BaseAnswer"));
         }
 
         public void AddServiceHelp()

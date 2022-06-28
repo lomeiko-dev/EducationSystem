@@ -10,5 +10,6 @@ namespace EducationSystem.Core.Entity.User
         public DateTime DateBirthday { get; set; }
         public string? Id_school { get; set; }
         public string? Id_class { get; set; }
+        public string? Refresh_token { get; set; }
     }
 }

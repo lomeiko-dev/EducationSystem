@@ -16,7 +16,7 @@ namespace EducationSystem.Helper.JWT
             this.optionsJwtValidate = optionsJwtValidate.Value;
         }
 
-        public bool IsValid(string refreshToken)
+        public ClaimsPrincipal GetPrincipal(string token)
         {
             var validationParametrs = new TokenValidationParameters
             {
@@ -28,24 +28,25 @@ namespace EducationSystem.Helper.JWT
                 ValidateAudience = true,
                 ClockSkew = TimeSpan.Zero
             };
-            var handler = new JwtSecurityTokenHandler();
 
+            var handler = new JwtSecurityTokenHandler();
             try
             {
-                handler.ValidateToken(refreshToken, validationParametrs, out SecurityToken validatedToken);
-                return true;
+                var principal = handler.ValidateToken(token, validationParametrs, out SecurityToken validatedToken);
+                return principal;
             }
-            catch (Exception)
-            { return false; }
+            catch { throw new SecurityTokenException("Invalid token"); }
         }
 
-        public string CreateToken(int minute, List<Claim> claims)
+        public string GenerateToken(List<Claim> claims, GeneratorType type)
         {
             var jwt = new JwtSecurityToken(
             issuer: optionsJwtValidate.Issuer,
             audience: optionsJwtValidate.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(minute)),
+            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(type == 0 ? 
+                                                                              int.Parse(optionsJwtValidate.ExpiresAccess) : 
+                                                                              int.Parse(optionsJwtValidate.ExpiresRefresh))),
             signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(optionsJwtValidate.Key)), SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);

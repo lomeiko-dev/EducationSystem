@@ -1,7 +1,5 @@
-﻿using EducationSystem.Application.Repository;
-using EducationSystem.Application.ServiceControllers;
+﻿using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
-using EducationSystem.Core.Entity.Refresh;
 using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.JWT;
 using EducationSystem.Helper.Options;
@@ -22,9 +20,8 @@ namespace EducationSystem.BussinesLogic.ServiceController
         private readonly EmailService emailService;
 
         private readonly OptionsAnswer optionsAnswer;
+        private readonly OptionsBaseAnswer optionsBaseAnswer;
         private readonly JwtManager generateJwtToken;
-
-        private readonly IRefreshRepository<bool, RefreshToken, string> refreshRepository;
         private readonly UserManager<User> userManager;
 
         private readonly IUrlHelper urlHelper;
@@ -32,16 +29,16 @@ namespace EducationSystem.BussinesLogic.ServiceController
         public AuthService(
                            EmailService emailService,
                            IOptions<OptionsAnswer> optionsAnswer,
+                           IOptions<OptionsBaseAnswer> optionsBaseAnswer,
                            UserManager<User> userManager,
                            JwtManager generateJwtToken,
-                           IRefreshRepository<bool, RefreshToken, string> refreshRepository,
                            IUrlHelperFactory urlHelperFactory,
                            IActionContextAccessor actionContextAccessor)
         {
             this.emailService = emailService;
             this.optionsAnswer = optionsAnswer.Value;
+            this.optionsBaseAnswer = optionsBaseAnswer.Value;
             this.generateJwtToken = generateJwtToken;
-            this.refreshRepository = refreshRepository;
             this.userManager = userManager;
 
              urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
@@ -67,6 +64,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
             if (!result.Succeeded)
                 return new BaseResponse(result.Errors.Select(x => x.Description), 400);
 
+            // result
             return new BaseResponse(optionsAnswer.RegistrationSuccessfullyMessage, 200);
         }
 
@@ -96,7 +94,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
             // find user by id
             var user = await userManager.FindByIdAsync(id_user);
             if (user == null)
-                return new BaseResponse(optionsAnswer.NotFound.Replace("{object}", "user"), 404);
+                return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
 
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             // generate url
@@ -108,7 +106,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
                                                                                      .Replace("{url}", url));
             await emailService.Send();
 
-            return new BaseResponse(optionsAnswer.Succeeded, 200);
+            return new BaseResponse(optionsAnswer.SendMailSuccessful.Replace("{address}", user.Email), 200);
         }
 
         public async Task<BaseResponse> EmailConfirmAsync(RequestEmailConfirm request)
@@ -116,12 +114,16 @@ namespace EducationSystem.BussinesLogic.ServiceController
             // find user by id from request
             var user = await userManager.FindByIdAsync(request.Id_user);
             if (user == null)
-                return new BaseResponse(optionsAnswer.NotFound, 404);
+                return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
+
+            var resultConfirmEmail = await userManager.IsEmailConfirmedAsync(user);
+            if (resultConfirmEmail)
+                return new BaseResponse(optionsAnswer.Emailconfirmed, 400);
 
             // check tokens
             var result = await userManager.ConfirmEmailAsync(user, request.Token);
             if (!result.Succeeded)
-                return new BaseResponse(result.Errors.Select(x => x.Description), 400);
+                return new BaseResponse(optionsBaseAnswer.NotValid.Replace("{object}", "token"), 400);
 
             return new BaseResponse(optionsAnswer.Emailconfirmed, 200);
         }
@@ -129,34 +131,23 @@ namespace EducationSystem.BussinesLogic.ServiceController
         public async Task<BaseResponse> LogoutUserAsync(string id_user)
         {
             // find token by user id
-            var token = await refreshRepository.GetTokenByUserIdAsync(id_user);
-            if (token == null)
-                return new BaseResponse(optionsAnswer.NotFound.Replace("{object}", "user"), 404);
+            var user = await userManager.FindByIdAsync(id_user);
+            if (user == null)
+                return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
 
-            // delete token
-            await refreshRepository.DeleteTokenAsync(token);
-
-            return new BaseResponse(optionsAnswer.Succeeded, 200);
+            user.Refresh_token = null;
+            await userManager.UpdateAsync(user);
+            return new BaseResponse(optionsBaseAnswer.Succeeded, 200);
         }
 
         public async Task<BaseResponse> RefreshTokenAsync(string request)
         {
-            // find token by refresh token from request
-            var token = await refreshRepository.GetTokenByRefreshToken(request);
-            if (token == null)
-                return new BaseResponse(optionsAnswer.NotValid.Replace("{object}", "token"), 404);
-
-            // check validate refresh token
-            if (!generateJwtToken.IsValid(token.Refresh))
-                return new BaseResponse(optionsAnswer.NotValid.Replace("{object}", "token"), 400);
-
-            // delete token by id
-            await refreshRepository.DeleteTokenAsync(token);
+            var principal = generateJwtToken.GetPrincipal(request);
 
             // find user by id from token
-            var user = await userManager.FindByIdAsync(token.id_user);
-            if (user == null)
-                return new BaseResponse(optionsAnswer.NotFound.Replace("{object}", "user"), 404);
+            var user = await userManager.FindByNameAsync(principal.Identity.Name);
+            if (user == null || user.Refresh_token != request)
+                return new BaseResponse(optionsBaseAnswer.NotValid.Replace("{object}", "client request"), 400);
 
             // create tokens
             return new BaseResponse(await GenerateJwtToken(user), 200);
@@ -166,23 +157,17 @@ namespace EducationSystem.BussinesLogic.ServiceController
 
         private async Task<object> GenerateJwtToken(User user)
         {
-            var claims = new List<Claim>
-            {
-                new Claim("Id", user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, "User"),
-                new Claim(JwtRegisteredClaimNames.Sub, user.FullName)
-            };
-
             // create tokens
-            string accessToken = generateJwtToken.CreateToken(15, claims.ToList());
-            string refreshToken = generateJwtToken.CreateToken(131400);
+            string accessToken = generateJwtToken.GenerateToken(15, 
+                                                                new List<Claim> { new Claim("Id", user.Id.ToString()),
+                                                                                  new Claim(ClaimTypes.Name, user.UserName),
+                                                                                  new Claim(ClaimsIdentity.DefaultRoleClaimType, "User"),
+                                                                                  new Claim(JwtRegisteredClaimNames.Sub, user.FullName)});
 
-            var token = await refreshRepository.GetTokenByUserIdAsync(user.Id.ToString());
-            if (token != null)
-                await refreshRepository.DeleteTokenAsync(token);
+            string refreshToken = generateJwtToken.GenerateToken(131400, new List<Claim> { new Claim(ClaimTypes.Name, user.UserName)});
 
-            await refreshRepository.CreateTokenAsync(new RefreshToken { Refresh = refreshToken, id_user = user.Id.ToString() });
+            user.Refresh_token = refreshToken;
+            await userManager.UpdateAsync(user);
 
             return new { accessToken = accessToken, refreshToken = refreshToken };
         }
