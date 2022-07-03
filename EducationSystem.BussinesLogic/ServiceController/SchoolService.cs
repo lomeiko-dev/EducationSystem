@@ -1,9 +1,11 @@
 ﻿using EducationSystem.Application.Repository;
 using EducationSystem.Application.ServiceControllers;
 using EducationSystem.Core.Entity.School;
+using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.Options;
 using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 namespace EducationSystem.BussinesLogic.ServiceController
@@ -12,15 +14,23 @@ namespace EducationSystem.BussinesLogic.ServiceController
     {
         private readonly IBaseCrud<bool, School, string> schoolRepository;
         private readonly OptionsBaseAnswer optionsBaseAnswer;
+        private readonly UserManager<User> userManager;
+
         public SchoolService(IBaseCrud<bool, School, string> schoolRepository, 
-                             IOptions<OptionsBaseAnswer> optionsBaseAnswer)
+                             IOptions<OptionsBaseAnswer> optionsBaseAnswer,
+                             UserManager<User> userManager)
         {
             this.schoolRepository = schoolRepository;
             this.optionsBaseAnswer = optionsBaseAnswer.Value;
+            this.userManager = userManager;
         }
 
         public async Task<BaseResponse> CreateSchoolAsync(RequestSchool request)
         {
+            var director = await userManager.FindByIdAsync(request.Id_Director);
+            if (director == null)
+                return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
+
             var school = await GetModelByRequestAsync(request);
             await schoolRepository.CreateAsync(school);
 
@@ -45,6 +55,10 @@ namespace EducationSystem.BussinesLogic.ServiceController
 
         public async Task<BaseResponse> UpdateSchoolAsync(string id, RequestSchool request)
         {
+            var director = await userManager.FindByIdAsync(request.Id_Director);
+            if (director == null)
+                return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
+
             var school = await GetModelByRequestAsync(request);
             var result = await schoolRepository.UpdateAsync(id, school);
             if(!result)

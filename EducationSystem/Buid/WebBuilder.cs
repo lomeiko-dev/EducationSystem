@@ -56,6 +56,7 @@ namespace EducationSystem.Web.Api.Buid
         public void AddServicesControllers()
         {
             Builder.Services.AddTransient<IAuthService<BaseResponse, RequestRegister, RequestLogin, RequestEmailConfirm, string, string>, AuthService>();
+            Builder.Services.AddTransient<ISchoolService<BaseResponse, RequestSchool, string>, SchoolService>();
         }
 
         public void AddServicesCrud()
