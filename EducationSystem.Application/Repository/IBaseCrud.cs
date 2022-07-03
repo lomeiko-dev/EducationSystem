@@ -5,7 +5,8 @@ namespace EducationSystem.Application.Repository
     {
         public Task<TReturn> CreateAsync(TEntity entity);
         public Task<TEntity> GetAsync(TId id);
-        public Task<TReturn> UpdateAsync(TEntity entity, TId id);
-        public Task DeleteAsync(TEntity entity);
+        public Task<IEnumerable<TEntity>> GetPageAsync(int skip, int take);
+        public Task<TReturn> UpdateAsync(TId id, TEntity entity);
+        public Task<TReturn> DeleteAsync(TId id);
     }
 }

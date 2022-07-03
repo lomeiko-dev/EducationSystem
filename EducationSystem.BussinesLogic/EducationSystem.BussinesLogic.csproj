@@ -18,8 +18,4 @@
     <ProjectReference Include="..\EducationSystem.Infrastructure\EducationSystem.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Repository\" />
-  </ItemGroup>
-
 </Project>

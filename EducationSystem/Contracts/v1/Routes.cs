@@ -19,5 +19,14 @@
 
         public const string ControllerAccount = _base + "/account";
 
+        public const string ControllerSchool = _base + "/school";
+
+        // base crud contracts
+        public const string Create = "create";
+        public const string Get = "get";
+        public const string GetPage = "get-page";
+        public const string Update = "update";
+        public const string Delete = "delete";
+
     }
 }

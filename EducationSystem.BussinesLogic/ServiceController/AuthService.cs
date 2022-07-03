@@ -26,8 +26,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
 
         private readonly IUrlHelper urlHelper;
 
-        public AuthService(
-                           EmailService emailService,
+        public AuthService(EmailService emailService,
                            IOptions<OptionsAnswer> optionsAnswer,
                            IOptions<OptionsBaseAnswer> optionsBaseAnswer,
                            UserManager<User> userManager,
@@ -84,7 +83,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
             var resultCheckEmailConfirm = await userManager.IsEmailConfirmedAsync(user);
             if (!resultCheckEmailConfirm)
                 return new BaseResponse(optionsAnswer.EmailNotConfirm, 400);
-               
+
             // return jwt tokens
             return new BaseResponse(await GenerateJwtToken(user), 200);
         }
@@ -158,13 +157,14 @@ namespace EducationSystem.BussinesLogic.ServiceController
         private async Task<object> GenerateJwtToken(User user)
         {
             // create tokens
-            string accessToken = generateJwtToken.GenerateToken(15, 
-                                                                new List<Claim> { new Claim("Id", user.Id.ToString()),
+            string accessToken = generateJwtToken.GenerateToken(new List<Claim> { new Claim("Id", user.Id.ToString()),
                                                                                   new Claim(ClaimTypes.Name, user.UserName),
                                                                                   new Claim(ClaimsIdentity.DefaultRoleClaimType, "User"),
-                                                                                  new Claim(JwtRegisteredClaimNames.Sub, user.FullName)});
+                                                                                  new Claim(JwtRegisteredClaimNames.Sub, user.FullName)},
+                                                                GeneratorType.Acceess);
 
-            string refreshToken = generateJwtToken.GenerateToken(131400, new List<Claim> { new Claim(ClaimTypes.Name, user.UserName)});
+            string refreshToken = generateJwtToken.GenerateToken(new List<Claim> { new Claim(ClaimTypes.Name, user.UserName)},
+                                                                 GeneratorType.Refresh);
 
             user.Refresh_token = refreshToken;
             await userManager.UpdateAsync(user);

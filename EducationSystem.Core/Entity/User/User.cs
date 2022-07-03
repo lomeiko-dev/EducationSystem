@@ -11,5 +11,6 @@ namespace EducationSystem.Core.Entity.User
         public string? Id_school { get; set; }
         public string? Id_class { get; set; }
         public string? Refresh_token { get; set; }
+        public bool IsAdmin { get; set; } = false;
     }
 }

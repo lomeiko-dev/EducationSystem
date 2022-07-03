@@ -1,13 +1,18 @@
-﻿using EducationSystem.Application.ServiceControllers;
+﻿using EducationSystem.Application.Repository;
+using EducationSystem.Application.ServiceControllers;
 using EducationSystem.BussinesLogic.ExternalService;
+using EducationSystem.BussinesLogic.Repository;
 using EducationSystem.BussinesLogic.ServiceController;
+using EducationSystem.Core.Entity.School;
 using EducationSystem.Core.Entity.User;
 using EducationSystem.Helper.Custom;
+using EducationSystem.Helper.Init;
 using EducationSystem.Helper.JWT;
 using EducationSystem.Helper.Options;
 using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
 using EducationSystem.Infrastructure.Context;
+using EducationSystem.Web.Api.Middlewars;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -55,6 +60,7 @@ namespace EducationSystem.Web.Api.Buid
 
         public void AddServicesCrud()
         {
+            Builder.Services.AddTransient<IBaseCrud<bool, School, string>, SchoolRepository>();
         }
 
         public void AddModelOptions()
@@ -63,7 +69,9 @@ namespace EducationSystem.Web.Api.Buid
                             .Configure<OptionsAnswer>(Builder.Configuration.GetSection("Answer"))
                             .Configure<OptionsCustomValidateUser>(Builder.Configuration.GetSection("CustomValidateUser"))
                             .Configure<OptionsJwtValidate>(Builder.Configuration.GetSection("JWTTokenValidate"))
-                            .Configure<OptionsBaseAnswer>(Builder.Configuration.GetSection("BaseAnswer"));
+                            .Configure<OptionsBaseAnswer>(Builder.Configuration.GetSection("BaseAnswer"))
+                            .Configure<OptionsRole>(Builder.Configuration.GetSection("Role"))
+                            .Configure<OptionsInitializeAdminAccount>(Builder.Configuration.GetSection("InitializeAdminAccount"));
         }
 
         public void AddServiceHelp()
@@ -76,6 +84,7 @@ namespace EducationSystem.Web.Api.Buid
                             .AddUserValidator<CustomUserValidator>()
                             .AddEntityFrameworkStores<ApplicationContext>()
                             .AddDefaultTokenProviders();
+            Builder.Services.AddTransient<InitializeDbIdentity>();
 
         }
 
@@ -93,6 +102,8 @@ namespace EducationSystem.Web.Api.Buid
             App.UseAuthentication();
             App.UseAuthorization();
             App.UseCors();
+
+            App.UseMiddleware<DbInitializeMiddleware>();
 
             App.UseEndpoints(point =>
             {

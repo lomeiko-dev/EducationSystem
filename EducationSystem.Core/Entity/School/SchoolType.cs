@@ -1,8 +1,8 @@
 ﻿namespace EducationSystem.Core.Entity.School
 {
-    public class TypeSchool
+    public class SchoolType
     {
         public int Id { get; }
-        public string Type_Name { get; }
+        public string Name { get; }
     }
 }

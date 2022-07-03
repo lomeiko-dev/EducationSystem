@@ -11,13 +11,13 @@ namespace EducationSystem.Helper.Request
         [DataType(DataType.PhoneNumber)]
         public string NumberPhone { get; set; }
 
-        [Required(ErrorMessage = "DateDayBirth is null")]
+        [Required]
         public string DateDayBirth { get; set; }
 
-        [Required(ErrorMessage = "DateMonthBirth is null")]
+        [Required]
         public string DateMonthBirth { get; set; }
 
-        [Required(ErrorMessage = "DateYearBirth is null")]
+        [Required]
         public string DateYearBirth { get; set; }
 
         [Required(ErrorMessage = "Адрес проживания не указан")]
