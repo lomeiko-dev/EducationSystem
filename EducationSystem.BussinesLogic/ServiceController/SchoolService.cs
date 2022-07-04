@@ -70,6 +70,10 @@ namespace EducationSystem.BussinesLogic.ServiceController
             if (director == null)
                 return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
 
+            // check schools
+            if (await schoolRepository.GetAsync(x => x.Id_Director == request.Id_Director) != null)
+                return new BaseResponse(optionsAnswer.directorBusy, 400);
+
             // create and update model
             var school = GetModelByRequestAsync(request);
             var result = await schoolRepository.UpdateAsync(id, school);
