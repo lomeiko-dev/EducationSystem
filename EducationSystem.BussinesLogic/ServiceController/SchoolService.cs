@@ -15,23 +15,32 @@ namespace EducationSystem.BussinesLogic.ServiceController
         private readonly IBaseCrud<bool, School, string> schoolRepository;
         private readonly OptionsBaseAnswer optionsBaseAnswer;
         private readonly UserManager<User> userManager;
+        private readonly OptionsAnswer optionsAnswer;
 
         public SchoolService(IBaseCrud<bool, School, string> schoolRepository, 
                              IOptions<OptionsBaseAnswer> optionsBaseAnswer,
-                             UserManager<User> userManager)
+                             UserManager<User> userManager,
+                             IOptions<OptionsAnswer> optionsAnswer)
         {
             this.schoolRepository = schoolRepository;
             this.optionsBaseAnswer = optionsBaseAnswer.Value;
             this.userManager = userManager;
+            this.optionsAnswer = optionsAnswer.Value;
         }
 
         public async Task<BaseResponse> CreateSchoolAsync(RequestSchool request)
         {
+            // get director by request id
             var director = await userManager.FindByIdAsync(request.Id_Director);
             if (director == null)
                 return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
 
-            var school = await GetModelByRequestAsync(request);
+            // check schools
+            if (await schoolRepository.GetAsync(x => x.Id_Director == request.Id_Director) != null)
+                return new BaseResponse(optionsAnswer.directorBusy, 400);
+
+            // create and add model
+            var school = GetModelByRequestAsync(request);
             await schoolRepository.CreateAsync(school);
 
             return new BaseResponse(optionsBaseAnswer.Succeeded, 200);
@@ -39,7 +48,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
 
         public async Task<BaseResponse> GetSchoolAsync(string id)
         {
-            var school = await schoolRepository.GetAsync(id);
+            var school = await schoolRepository.GetAsync(x => x.Id.ToString() == id);
             if(school == null)
                 return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "school"), 404);
             return new BaseResponse(school, 200);
@@ -48,21 +57,25 @@ namespace EducationSystem.BussinesLogic.ServiceController
         public async Task<BaseResponse> GetSchoolsPageAsync(int skip, int take)
         {
             var schools = await schoolRepository.GetPageAsync(skip, take);
-            if (schools == null)
+            if (schools.ToList().Count == 0)
                 return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "schools"), 404);
+
             return new BaseResponse(schools, 200);
         }
 
         public async Task<BaseResponse> UpdateSchoolAsync(string id, RequestSchool request)
         {
+            // get director by request id
             var director = await userManager.FindByIdAsync(request.Id_Director);
             if (director == null)
                 return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
 
-            var school = await GetModelByRequestAsync(request);
+            // create and update model
+            var school = GetModelByRequestAsync(request);
             var result = await schoolRepository.UpdateAsync(id, school);
             if(!result)
                 return new BaseResponse(optionsBaseAnswer.NotFound.Replace("{object}", "user"), 404);
+
             return new BaseResponse(optionsBaseAnswer.Succeeded, 200);
         }
 
@@ -76,7 +89,7 @@ namespace EducationSystem.BussinesLogic.ServiceController
 
         #region help methods
 
-        private async Task<School> GetModelByRequestAsync(RequestSchool request)
+        private School GetModelByRequestAsync(RequestSchool request)
         {
             return new School
             {

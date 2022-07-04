@@ -1,8 +1,8 @@
-﻿
-using EducationSystem.Application.Repository;
+﻿using EducationSystem.Application.Repository;
 using EducationSystem.Core.Entity.School;
 using EducationSystem.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EducationSystem.BussinesLogic.Repository
 {
@@ -24,9 +24,9 @@ namespace EducationSystem.BussinesLogic.Repository
             return true;
         }
 
-        public async Task<School> GetAsync(string id)
+        public async Task<School> GetAsync(Expression<Func<School, bool>> func)
         {
-            var school = await applicationContext.Schools.FirstOrDefaultAsync(x => x.Id.ToString() == id);
+            var school = await applicationContext.Schools.FirstOrDefaultAsync(func);
             return school;
         }
 

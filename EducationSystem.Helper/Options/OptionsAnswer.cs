@@ -11,5 +11,6 @@ namespace EducationSystem.Helper.Options
         public string UserNotFound { get; set; }
         public string InvalidPassword { get; set; }
         public string EmailconfirmedMessage { get; set; }
+        public string directorBusy { get; set; }
     }
 }
