@@ -8,7 +8,6 @@ namespace EducationSystem.Helper.Request
         [Required]
         public string TypeSchool { get; set; }
 
-        [Required]
         public string Id_Director { get; set; }
 
         [Required(ErrorMessage = "Укажите имя школы")]

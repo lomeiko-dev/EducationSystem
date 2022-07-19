@@ -20,22 +20,22 @@ namespace EducationSystem.Web.Api.Controllers
 
         [HttpPost(Routes.Create)]
         public async Task<IActionResult> CreateSchoolAsync([FromBody] RequestSchool requestSchool) =>
-            await this.Take(requestSchool, schoolService.CreateSchoolAsync);
+            await this.Wrap(requestSchool, schoolService.CreateSchoolAsync);
 
         [HttpGet(Routes.Get)]
         public async Task<IActionResult> GetSchoolAsync([Required] string id) =>
-            await this.Take(id, schoolService.GetSchoolAsync);
+            await this.Wrap(id, schoolService.GetSchoolAsync);
 
         [HttpGet(Routes.GetPage)]
         public async Task<IActionResult> GetSchoolsAsync([Required] int skip, [Required] int take) =>
-            await this.Take(skip, take, schoolService.GetSchoolsPageAsync);
+            await this.Wrap(skip, take, schoolService.GetSchoolsPageAsync);
 
         [HttpPut(Routes.Update)]
         public async Task<IActionResult> UpdateSchoolAsync([FromBody] RequestSchool requestSchool, [Required] string id) =>
-            await this.Take(id, requestSchool, schoolService.UpdateSchoolAsync);
+            await this.Wrap(id, requestSchool, schoolService.UpdateSchoolAsync);
 
         [HttpDelete(Routes.Delete)]
         public async Task<IActionResult> DeleteSchoolAsync([Required] string id) =>
-            await this.Take(id, schoolService.DeleteSchoolAsync);
+            await this.Wrap(id, schoolService.DeleteSchoolAsync);
     }
 }

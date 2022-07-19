@@ -1,18 +1,23 @@
 ﻿using EducationSystem.Application.Repository;
 using EducationSystem.Application.ServiceControllers;
+using EducationSystem.Application.Validate;
 using EducationSystem.BussinesLogic.ExternalService;
 using EducationSystem.BussinesLogic.Repository;
 using EducationSystem.BussinesLogic.ServiceController;
+using EducationSystem.BussinesLogic.Validate;
 using EducationSystem.Core.Entity.School;
 using EducationSystem.Core.Entity.User;
+using EducationSystem.Core.Role;
 using EducationSystem.Helper.Custom;
 using EducationSystem.Helper.Init;
 using EducationSystem.Helper.JWT;
 using EducationSystem.Helper.Options;
+using EducationSystem.Helper.Options.OptionsConst;
 using EducationSystem.Helper.Request;
 using EducationSystem.Helper.Response;
 using EducationSystem.Infrastructure.Context;
 using EducationSystem.Web.Api.Middlewars;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -38,9 +43,13 @@ namespace EducationSystem.Web.Api.Buid
 
         public void AddAuthorizeAuthentication()
         {
-            Builder.Services.AddAuthentication(optionsManager.AuthenticationOption)
-                            .AddJwtBearer(optionsManager.JWTOption);
             Builder.Services.AddAuthorization();
+            Builder.Services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                            .AddJwtBearer(optionsManager.JWTOption); // JWT
         }
 
         public void AddCors()
@@ -55,13 +64,16 @@ namespace EducationSystem.Web.Api.Buid
 
         public void AddServicesControllers()
         {
-            Builder.Services.AddTransient<IAuthService<BaseResponse, RequestRegister, RequestLogin, RequestEmailConfirm, string, string>, AuthService>();
-            Builder.Services.AddTransient<ISchoolService<BaseResponse, RequestSchool, string>, SchoolService>();
+            Builder.Services.AddTransient<IAuthService<BaseResponse, RequestRegister, RequestLogin, RequestEmailConfirm, string, string>, AuthService>()
+                            .AddTransient<ISchoolService<BaseResponse, RequestSchool, string>, SchoolService>()
+                            .AddTransient<IOrderSchoolService<BaseResponse, RequestOrderSchool, string, string>, OrderSchoolService>()
+                            .AddTransient<IUserService<BaseResponse, User, string>, UserService>();
         }
 
         public void AddServicesCrud()
         {
-            Builder.Services.AddTransient<IBaseCrud<bool, School, string>, SchoolRepository>();
+            Builder.Services.AddTransient<IBaseCrud<bool, School, string>, SchoolRepository>()
+                            .AddTransient<IBaseCrud<bool, OrderSchool, string>, OrderSchoolRepository>();
         }
 
         public void AddModelOptions()
@@ -80,12 +92,17 @@ namespace EducationSystem.Web.Api.Buid
             Builder.Services.AddTransient<EmailService>()
                             .AddTransient<JwtManager>();
 
-            Builder.Services.AddIdentity<User, IdentityRole>(optionsManager.IdentityUserOption)
+            Builder.Services.AddIdentity<User, Role>(optionsManager.IdentityUserOption)
                             .AddErrorDescriber<CustomIdentityErrorDescription>()
                             .AddUserValidator<CustomUserValidator>()
                             .AddEntityFrameworkStores<ApplicationContext>()
                             .AddDefaultTokenProviders();
+
             Builder.Services.AddTransient<InitializeDbIdentity>();
+
+            Builder.Services.AddTransient<IValidate<BaseResponse, School>, ValidateSchool>()
+                            .AddTransient<IValidate<BaseResponse, OrderSchool>, ValidateOrderSchool>()
+                            .AddTransient<IValidate<IEnumerable<string>, RequestValidateAddedRole>, ValidatePermissionAddedRole>();
 
         }
 
@@ -99,12 +116,14 @@ namespace EducationSystem.Web.Api.Buid
         {
             App = Builder.Build();
 
-            App.UseRouting();
-            App.UseAuthentication();
-            App.UseAuthorization();
+            App.UseMiddleware<DbInitializeMiddleware>();
+
             App.UseCors();
 
-            App.UseMiddleware<DbInitializeMiddleware>();
+            App.UseRouting();
+
+            App.UseAuthentication();
+            App.UseAuthorization();
 
             App.UseEndpoints(point =>
             {
@@ -112,6 +131,8 @@ namespace EducationSystem.Web.Api.Buid
                     name: "default",
                     pattern: "{Controller}/{Action}");
             });
+
+            App.Run();
         }
     }
 }

@@ -26,28 +26,28 @@ namespace EducationSystem.Web.Api.Controllers
 
         [HttpPost(Routes.Register)]
         public async Task<IActionResult> RegisterAsync([FromBody]RequestRegister request) => 
-            await this.Take(request, authService.RegisterUserAsync);
+            await this.Wrap(request, authService.RegisterUserAsync);
 
         [HttpPost(Routes.Login)]
         public async Task<IActionResult> LoginAsync([FromBody] RequestLogin request) =>
-            await this.Take(request, authService.LoginUserAsync);
+            await this.Wrap(request, authService.LoginUserAsync);
 
         [HttpPost(Routes.SendConfirmMessage)]
         public async Task<IActionResult> SendConfirmMassageAsync([Required]string id_user) =>
-            await this.Take(id_user, 
+            await this.Wrap(id_user, 
                             Routes.ConfirmEmail, Routes.ControllerAuth,
                             authService.SendNewConfirmMessageEmailAsync);
 
         [Route(Routes.ConfirmEmail)]
         public async Task<IActionResult> ConfirmEmailAsync(RequestEmailConfirm request) =>
-            await this.Take(request, authService.EmailConfirmAsync);
+            await this.Wrap(request, authService.EmailConfirmAsync);
 
         [Route(Routes.Logout)]
         public async Task<IActionResult> LogoutAsync([Required]string id_user) =>
-            await this.Take(id_user, authService.LogoutUserAsync);
+            await this.Wrap(id_user, authService.LogoutUserAsync);
 
         [Route(Routes.Refresh)]
         public async Task<IActionResult> RefreshTokenAsync([Required]string refresh) =>
-            await this.Take(refresh, authService.RefreshTokenAsync);
+            await this.Wrap(refresh, authService.RefreshTokenAsync);
     }
 }

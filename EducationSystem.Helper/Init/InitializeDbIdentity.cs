@@ -1,4 +1,5 @@
 ﻿using EducationSystem.Core.Entity.User;
+using EducationSystem.Core.Role;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
@@ -13,7 +14,7 @@ namespace EducationSystem.Helper.Init
             this.logger = logger;
         }
 
-        public async Task InitializeRoleAsync(RoleManager<IdentityRole> roleManager, List<IdentityRole> roles)
+        public async Task InitializeRoleAsync(RoleManager<Role> roleManager, List<Role> roles)
         {
             foreach (var role in roles)
             {

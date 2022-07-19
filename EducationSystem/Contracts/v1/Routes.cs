@@ -19,7 +19,14 @@
 
         public const string ControllerAccount = _base + "/account";
 
+        public const string ControllerUser = _base + "/user";
+
+        public const string AddToRole = "add-to-role";
+        public const string RemoveToRole = "remove-to-role";
+
         public const string ControllerSchool = _base + "/school";
+
+        public const string ControllerOrderSchool = _base + "/order-school";
 
         // base crud contracts
         public const string Create = "create";

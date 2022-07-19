@@ -72,17 +72,17 @@ namespace EducationSystem.BussinesLogic.ServiceController
             // find user by email address
             var user = await userManager.FindByEmailAsync(request.Login);
                 if (user == null)
-                    return new BaseResponse(optionsAnswer.UserNotFound, 404);
+                    return new BaseResponse(optionsAnswer.LoginNotFound, 404);
 
             // check password
             var resultChekPassword = await userManager.CheckPasswordAsync(user, request.Password);
             if (!resultChekPassword)
                 return new BaseResponse(optionsAnswer.InvalidPassword, 400);
 
-            // check confirm email
-            var resultCheckEmailConfirm = await userManager.IsEmailConfirmedAsync(user);
-            if (!resultCheckEmailConfirm)
-                return new BaseResponse(optionsAnswer.EmailNotConfirm, 400);
+            //// check confirm email
+            //var resultCheckEmailConfirm = await userManager.IsEmailConfirmedAsync(user);
+            //if (!resultCheckEmailConfirm)
+            //    return new BaseResponse(optionsAnswer.EmailNotConfirm, 400);
 
             // return jwt tokens
             return new BaseResponse(await GenerateJwtToken(user), 200);
@@ -156,12 +156,15 @@ namespace EducationSystem.BussinesLogic.ServiceController
 
         private async Task<object> GenerateJwtToken(User user)
         {
+            var claims = new List<Claim> { new Claim("Id", user.Id.ToString()),
+                                           new Claim(ClaimTypes.Name, user.UserName),
+                                           new Claim(JwtRegisteredClaimNames.Sub, user.FullName)};
+
+            foreach (var item in await userManager.GetRolesAsync(user))
+                claims.Add(new Claim(ClaimTypes.Role, item));
+
             // create tokens
-            string accessToken = generateJwtToken.GenerateToken(new List<Claim> { new Claim("Id", user.Id.ToString()),
-                                                                                  new Claim(ClaimTypes.Name, user.UserName),
-                                                                                  new Claim(ClaimsIdentity.DefaultRoleClaimType, "User"),
-                                                                                  new Claim(JwtRegisteredClaimNames.Sub, user.FullName)},
-                                                                GeneratorType.Acceess);
+            string accessToken = generateJwtToken.GenerateToken(claims, GeneratorType.Acceess);
 
             string refreshToken = generateJwtToken.GenerateToken(new List<Claim> { new Claim(ClaimTypes.Name, user.UserName)},
                                                                  GeneratorType.Refresh);

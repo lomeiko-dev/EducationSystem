@@ -25,17 +25,13 @@ namespace EducationSystem.Helper.JWT
                 ValidAudience = optionsJwtValidate.Audience,
                 ValidateIssuerSigningKey = true,
                 ValidateIssuer = true,
-                ValidateAudience = true,
-                ClockSkew = TimeSpan.Zero
+                ValidateAudience = true
             };
 
             var handler = new JwtSecurityTokenHandler();
-            try
-            {
                 var principal = handler.ValidateToken(token, validationParametrs, out SecurityToken validatedToken);
                 return principal;
-            }
-            catch { throw new SecurityTokenException("Invalid token"); }
+            
         }
 
         public string GenerateToken(List<Claim> claims, GeneratorType type)

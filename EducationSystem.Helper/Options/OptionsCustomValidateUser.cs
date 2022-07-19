@@ -5,6 +5,7 @@ namespace EducationSystem.Helper.Options
     {
         public bool NickNameDontUseSymbol { get; set; }
         public bool NickNameUseFormat { get; set; }
+        public List<string> BlockEmailRegions { get; set; }
     }
 
 }
